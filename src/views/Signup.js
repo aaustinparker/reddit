@@ -13,7 +13,7 @@ export const Signup = ({ history, newUser }) => {
         password: document.getElementById("password").value
       }
     );
-    history.push('/');
+    history.push('/posts');
   }
 
   return (

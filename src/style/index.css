@@ -38,3 +38,26 @@ body {
   color: gray;
   margin-left: 100px;
 }
+
+.input {
+  font-size: 12pt;
+}
+
+#comment {
+  width: 400px;
+  height: 100px;
+}
+
+#response {
+  width: 300px;
+  height: 20px;
+}
+
+#comment_table {
+  border-top: 1px solid #e8e8e8;
+  padding: 30px 0;
+}
+
+#response_form {
+  margin-left: 100px;
+}
