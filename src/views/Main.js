@@ -16,43 +16,58 @@ let _  = require('underscore');
 export class Main extends React.Component {
 
   constructor(props) {
-        let users = [
-          {id: 1, username: "parker", password: "password" },
-          {id: 2, username: "craig", password: "password" },
-          {id: 3, username: "jeffrey", password: "password" },
-          {id: 4, username: "leonard", password: "password" },
-          {id: 5, username: "johnny", password: "password" }
-        ];
+    super(props);
+    this.state = {
+      users: [],
+      microposts: []
+    };
+    this.test = this.test.bind(this);
+    this.newUser = this.newUser.bind(this);
+    this.newPost = this.newPost.bind(this);
+    this.newComment = this.newComment.bind(this);
+  }
 
-        let microposts = [
-          {post_id: 1, user_id: 1, content: "I quite enjoy watching the Cavs lose",
-            responses: [
-              {user_id: 2, content: "Lame opinion guy"}
-            ]},
-          {post_id: 2, user_id: 2, content: "Boy that guy was dumb",
-            responses: [
-              {user_id: 3, content: "Ur both dumb roflcopter"}
-            ]},
-          {post_id: 3, user_id: 4, content: "I took a picture of my breakfast. Validate me.",
-            responses:
-              []
-          }
-        ];
 
-        super(props);
-        this.state = {
-          user_id: 6,
-          post_id: 4,
-          users: users,
-          microposts: microposts
-      };
-      this.test = this.test.bind(this);
-      this.newUser = this.newUser.bind(this);
-      this.newPost = this.newPost.bind(this);
-      this.newComment = this.newComment.bind(this);
+  componentDidMount() {
+    let users, microposts;
+
+    if (!localStorage.getItem("users") || !localStorage.getItem("microposts")) {
+      users = [
+        {id: 1, username: "parker", password: "password" },
+        {id: 2, username: "craig", password: "password" },
+        {id: 3, username: "jeffrey", password: "password" },
+        {id: 4, username: "leonard", password: "password" },
+        {id: 5, username: "johnny", password: "password" }
+      ];
+
+      microposts = [
+        {post_id: 1, user_id: 1, content: "I quite enjoy watching the Cavs lose",
+          responses: [
+            {user_id: 2, content: "Lame opinion guy"}
+          ]},
+        {post_id: 2, user_id: 2, content: "Boy that guy was dumb",
+          responses: [
+            {user_id: 3, content: "Ur both dumb roflcopter"}
+          ]},
+        {post_id: 3, user_id: 4, content: "I took a picture of my breakfast. Validate me.",
+          responses:
+            []
+        }
+      ];
 
       localStorage.setItem("users", JSON.stringify(users));
       localStorage.setItem("microposts", JSON.stringify(microposts));
+      localStorage.setItem("user_id", "10");
+      localStorage.setItem("post_id", "10");
+    } else {
+      users = JSON.parse(localStorage.getItem("users"));
+      microposts = JSON.parse(localStorage.getItem("microposts"));
+    }
+
+    this.setState({
+      users: users,
+      microposts: microposts
+    })
   }
 
 
@@ -62,34 +77,34 @@ export class Main extends React.Component {
 
 
   newUser(user) {
-    let user_id = this.state.user_id;
+    let user_id = parseInt(localStorage.getItem("user_id"));
     let temp = this.state.users;
     temp.push({
       id: user_id,
       username: user.username,
       password: user.password
     });
-    localStorage.setItem("user_id", user_id.toString());
+    localStorage.setItem("current_user", user_id.toString());
+    localStorage.setItem("user_id", (user_id + 1).toString());
     localStorage.setItem("users", JSON.stringify(temp));
     this.setState({
-      user_id: user_id++,
       users: temp
     })
   }
 
 
   newPost(content) {
-     let post_id = this.state.post_id;
+     let post_id = parseInt(localStorage.getItem("post_id"));
      let temp = this.state.microposts;
      temp.push({
        post_id: post_id,
-       user_id: parseInt(localStorage.getItem("user_id")),
+       user_id: parseInt(localStorage.getItem("current_user")),
        content: content,
        responses: []
      });
      localStorage.setItem("microposts", JSON.stringify(temp));
+     localStorage.setItem("post_id", (post_id + 1).toString());
      this.setState({
-       post_id: post_id++,
        microposts: temp
      })
   }
@@ -102,7 +117,7 @@ export class Main extends React.Component {
         temp.push(micropost);
       } else {
         micropost.responses.push({
-          user_id: parseInt(localStorage.getItem("user_id")),
+          user_id: parseInt(localStorage.getItem("current_user")),
           content: content
         });
         temp.push(micropost);

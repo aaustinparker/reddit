@@ -5,15 +5,13 @@ let _  = require('underscore');
 
 export const Posts = ({ newPost, newComment, history }) => {
 
-  if (!sessionStorage.getItem("user_id")) {
+  if (!localStorage.getItem("current_user")) {
     alert("Please log in before posting a comment.");
     history.push('/signup');
   }
 
   let microposts = JSON.parse(localStorage.getItem("microposts"));
   let users = JSON.parse(localStorage.getItem("users"));
-  console.log(users);
-  console.log(microposts);
 
   document.title = "Micropost Hub";
 
@@ -45,6 +43,7 @@ export const Posts = ({ newPost, newComment, history }) => {
       responses = <li className="empty">No responses currently available.</li>;
     }
 
+    let id = "response" + micropost.post_id;
     return (
       <ul className="microposts">
         <li>
@@ -60,7 +59,7 @@ export const Posts = ({ newPost, newComment, history }) => {
               <tbody>
                 <tr>
                   <td><label htmlFor="response">You say:  </label></td>
-                  <td><textarea className="input" id="response" name="response"/></td>
+                  <td><textarea className="input response" id={id} name="response"/></td>
                   <td><button type="submit">Respond</button></td>
                 </tr>
               </tbody>
@@ -82,9 +81,9 @@ export const Posts = ({ newPost, newComment, history }) => {
   function makeComment(event) {
     event.preventDefault();
     let post_id = event.target.dataset.post_id;
-    let content = document.getElementById("response").value;
-    newComment()(post_id, content);
-    document.getElementById("comment").value = '';
+    let content = document.getElementById("response" + post_id).value;
+    newComment()(parseInt(post_id), content);
+    document.getElementById("response" + post_id).value = '';
   }
 
 
