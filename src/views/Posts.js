@@ -3,7 +3,7 @@ import React from 'react';
 let _  = require('underscore');
 
 
-export const Posts = ({ newPost, newComment, history }) => {
+export const Posts = ({ newPost, newComment, deletePost, deleteComment, history }) => {
 
   if (!localStorage.getItem("current_user")) {
     alert("Please log in before posting a comment.");
@@ -23,24 +23,85 @@ export const Posts = ({ newPost, newComment, history }) => {
   }
 
 
+
+  function makePost(event) {
+    event.preventDefault();
+    newPost()(document.getElementById("comment").value);
+    document.getElementById("comment").value = '';
+  }
+
+
+  function makeComment(event) {
+    event.preventDefault();
+    let post_id = event.target.dataset.post_id;
+    let content = document.getElementById("response" + post_id).value;
+    newComment()(parseInt(post_id), content);
+    document.getElementById("response" + post_id).value = '';
+  }
+
+
+  function removeComment(event) {
+    let post_id = parseInt(event.target.dataset.post_id);
+    let response_id = parseInt(event.target.dataset.response_id);
+    deleteComment()(post_id, response_id);
+  }
+
+
+  function removePost(event) {
+    let post_id = parseInt(event.target.dataset.post_id);
+    deletePost()(post_id);
+  }
+
+
   function perPost(micropost) {
     let user = findPoster(micropost.user_id);
+
+    let deleteAndEditComment;
 
     let responses;
     let i = 0;
     if (micropost.responses.length > 0) {
       responses = micropost.responses.map(function(response) {
+        if (parseInt(localStorage.getItem("current_user")) === response.user_id) {
+          deleteAndEditComment = (
+            <span>
+              <button data-post_id={micropost.post_id}  data-response_id={response.response_id}
+                type="button" onClick={removeComment}>Delete</button>
+                <button type="button" onClick={() =>
+                  history.push('/edit/' + micropost.post_id + "_" + response.response_id)}>
+                  Edit</button>
+            </span>
+          );
+        } else {
+          deleteAndEditComment = <span></span>;
+        }
         return (
           <li key={i++}>
             <span className="responder">{findPoster(response.user_id).username}</span>
             <span> replied: </span>
             <span className="content">{response.content}</span>
+            <span>  &nbsp;   </span>
+            {deleteAndEditComment}
           </li>
         );
       });
-
     } else {
       responses = <li className="empty">No responses currently available.</li>;
+    }
+
+    let deleteAndEditPost;
+    if (parseInt(localStorage.getItem("current_user")) === micropost.user_id) {
+      deleteAndEditPost = (
+        <span>
+        <button type="button" onClick={() =>
+          history.push('/edit/' + micropost.post_id + "_n")}>
+          Edit</button>
+        <button data-post_id={micropost.post_id} type="button"
+          onClick={removePost}>Delete</button>
+        </span>
+      );
+    } else {
+      deleteAndEditPost = <span></span>;
     }
 
     let id = "response" + micropost.post_id;
@@ -50,6 +111,8 @@ export const Posts = ({ newPost, newComment, history }) => {
           <span className="poster">{user.username}</span>
           <span> said: </span>
           <span className="content">{micropost.content}</span>
+          <span>  &nbsp;   </span>
+          {deleteAndEditPost}
           <div>&nbsp;</div>
         </li>
         {responses}
@@ -68,22 +131,6 @@ export const Posts = ({ newPost, newComment, history }) => {
         </li>
       </ul>
      );
-  }
-
-
-  function makePost(event) {
-    event.preventDefault();
-    newPost()(document.getElementById("comment").value);
-    document.getElementById("comment").value = '';
-  }
-
-
-  function makeComment(event) {
-    event.preventDefault();
-    let post_id = event.target.dataset.post_id;
-    let content = document.getElementById("response" + post_id).value;
-    newComment()(parseInt(post_id), content);
-    document.getElementById("response" + post_id).value = '';
   }
 
 
