@@ -7,12 +7,13 @@ import {
 } from 'react-router-dom';
 
 
-import { App } from './App';
+import { Login } from './Login';
 import { Signup } from './Signup';
 import { Posts } from './Posts';
 import { Edit } from './Edit';
 
 let _  = require('underscore');
+let crypto = require('crypto');
 
 export class Main extends React.Component {
 
@@ -29,6 +30,8 @@ export class Main extends React.Component {
     this.deletePost = this.deletePost.bind(this);
     this.deleteComment = this.deleteComment.bind(this);
     this.editPost = this.editPost.bind(this);
+    this.encrypt = this.encrypt.bind(this);
+    this.generateSalt = this.generateSalt.bind(this);
   }
 
 
@@ -37,11 +40,16 @@ export class Main extends React.Component {
 
     if (!localStorage.getItem("users") || !localStorage.getItem("microposts")) {
       users = [
-        {id: 1, username: "parker", password: "password" },
-        {id: 2, username: "craig", password: "password" },
-        {id: 3, username: "jeffrey", password: "password" },
-        {id: 4, username: "leonard", password: "password" },
-        {id: 5, username: "johnny", password: "password" }
+        {id: 1, username: "parker", salt: "fdae0e4cecdaaa03da96",
+         password: "6ecfe86141d19299162d5bf9067aed0dd8a7eac2be57220171e0e34e2e03ae45033c0cd49c4fa880b960923a21e1fdfdd40ad8fe405583f18420ab3eda171e20" },
+        {id: 2, username: "craig", salt: "fdae0e4cecdaaa03da96",
+         password: "6ecfe86141d19299162d5bf9067aed0dd8a7eac2be57220171e0e34e2e03ae45033c0cd49c4fa880b960923a21e1fdfdd40ad8fe405583f18420ab3eda171e20" },
+        {id: 3, username: "jeffrey", salt: "fdae0e4cecdaaa03da96",
+         password: "6ecfe86141d19299162d5bf9067aed0dd8a7eac2be57220171e0e34e2e03ae45033c0cd49c4fa880b960923a21e1fdfdd40ad8fe405583f18420ab3eda171e20" },
+        {id: 4, username: "leonard", salt: "fdae0e4cecdaaa03da96",
+         password: "6ecfe86141d19299162d5bf9067aed0dd8a7eac2be57220171e0e34e2e03ae45033c0cd49c4fa880b960923a21e1fdfdd40ad8fe405583f18420ab3eda171e20" },
+        {id: 5, username: "johnny", salt: "fdae0e4cecdaaa03da96",
+         password: "6ecfe86141d19299162d5bf9067aed0dd8a7eac2be57220171e0e34e2e03ae45033c0cd49c4fa880b960923a21e1fdfdd40ad8fe405583f18420ab3eda171e20" }
       ];
 
       microposts = [
@@ -83,10 +91,12 @@ export class Main extends React.Component {
   newUser(user) {
     let user_id = parseInt(localStorage.getItem("user_id"));
     let temp = this.state.users;
+    let salt = this.generateSalt();
     temp.push({
       id: user_id,
       username: user.username,
-      password: user.password
+      salt: salt,
+      password: this.encrypt(user.password, salt)
     });
     localStorage.setItem("current_user", user_id.toString());
     localStorage.setItem("user_id", (user_id + 1).toString());
@@ -201,12 +211,35 @@ export class Main extends React.Component {
   }
 
 
+  generateSalt() {
+    return crypto.randomBytes(10).toString('hex');
+  };
+
+
+  encrypt(password, salt) {
+    return crypto.createHmac('sha512', salt).update(password).digest('hex');
+  };
+
+
   render() {
     return (
       <Router>
         <div>
-          <Route exact path="/" render={ (props) => (<App message="hello" test={() => this.test} />) } />
-          <Route path="/signup" render={ (props) => (<Signup {...props} newUser={() => this.newUser} />) }/>
+
+          <Route exact path="/" render={ (props) =>
+            (<Login
+              {...props}
+              encrypt={() => this.encrypt}
+            />
+          ) } />
+
+          <Route path="/signup" render={ (props) => (
+            <Signup
+              {...props}
+              newUser={() => this.newUser}
+            />
+          ) }/>
+
           <Route path="/posts" render={ (props) => (
             <Posts
               {...props}
@@ -216,7 +249,14 @@ export class Main extends React.Component {
               deleteComment={() => this.deleteComment}
             />
           ) }/>
-          <Route path="/edit/:post_id" render={ (props) => (<Edit {...props} editPost={() => this.editPost} />) }/>
+
+          <Route path="/edit/:post_id" render={ (props) => (
+            <Edit
+              {...props}
+              editPost={() => this.editPost}
+             />)
+          }/>
+
         </div>
       </Router>
     )

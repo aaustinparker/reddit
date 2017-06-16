@@ -5,15 +5,15 @@ let _  = require('underscore');
 
 export const Posts = ({ newPost, newComment, deletePost, deleteComment, history }) => {
 
+  document.title = "Micropost Hub";
+
   if (!localStorage.getItem("current_user")) {
     alert("Please log in before posting a comment.");
     history.push('/signup');
   }
 
-  let microposts = JSON.parse(localStorage.getItem("microposts"));
   let users = JSON.parse(localStorage.getItem("users"));
-
-  document.title = "Micropost Hub";
+  let microposts = JSON.parse(localStorage.getItem("microposts"));
 
 
   function findPoster(poster_id) {
@@ -21,7 +21,6 @@ export const Posts = ({ newPost, newComment, deletePost, deleteComment, history 
        return user.id === poster_id;
      });
   }
-
 
 
   function makePost(event) {

@@ -53,6 +53,16 @@ body {
   height: 100px;
 }
 
+#header {
+  color: red;
+}
+
+#landing_pic {
+  max-width: 500px;
+  max-height: 200px;
+  display: block;
+  margin: auto;
+}
 
 #comment_table {
   border-top: 1px solid #e8e8e8;
