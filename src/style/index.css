@@ -48,6 +48,12 @@ body {
   height: 20px;
 }
 
+.upvote {
+  max-width: 30px;
+  max-height: 20px;
+  cursor: pointer;
+}
+
 #comment {
   width: 400px;
   height: 100px;

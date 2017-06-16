@@ -9,7 +9,7 @@ export const Edit = (props) => {
     event.preventDefault();
     let queryParam = props.match.params.post_id;
     let divider = queryParam.indexOf("_");
-    props.editPost()(
+    props.update()(
         parseInt(queryParam.substring(0, divider)),
         queryParam.substring(divider + 1),
         document.getElementById("comment").value

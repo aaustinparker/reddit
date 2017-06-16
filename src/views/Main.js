@@ -23,15 +23,14 @@ export class Main extends React.Component {
       users: [],
       microposts: []
     };
-    this.test = this.test.bind(this);
     this.newUser = this.newUser.bind(this);
     this.newPost = this.newPost.bind(this);
     this.newComment = this.newComment.bind(this);
     this.deletePost = this.deletePost.bind(this);
     this.deleteComment = this.deleteComment.bind(this);
-    this.editPost = this.editPost.bind(this);
     this.encrypt = this.encrypt.bind(this);
     this.generateSalt = this.generateSalt.bind(this);
+    this.update = this.update.bind(this);
   }
 
 
@@ -53,15 +52,15 @@ export class Main extends React.Component {
       ];
 
       microposts = [
-        {post_id: 1, user_id: 1, content: "I quite enjoy watching the Cavs lose", response_num: 1,
+        {post_id: 1, user_id: 1, upvotes: 0, content: "I quite enjoy watching the Cavs lose", response_num: 1,
           responses: [
-            {response_id: 0, user_id: 2, content: "Lame opinion guy"}
+            {response_id: 0, user_id: 2, upvotes: 0, content: "Lame opinion guy"}
           ]},
-        {post_id: 2, user_id: 2, content: "Boy that guy was dumb", response_num: 1,
+        {post_id: 2, user_id: 2, upvotes: 0, content: "Boy that guy was dumb", response_num: 1,
           responses: [
-            {response_id: 0, user_id: 3, content: "Ur both dumb roflcopter"}
+            {response_id: 0, user_id: 3, upvotes: 0, content: "Ur both dumb roflcopter"}
           ]},
-        {post_id: 3, user_id: 4, content: "I took a picture of my breakfast. Validate me.", response_num: 0,
+        {post_id: 3, user_id: 4, upvotes: 0, content: "I took a picture of my breakfast. Validate me.", response_num: 0,
           responses:
             []
         }
@@ -80,11 +79,6 @@ export class Main extends React.Component {
       users: users,
       microposts: microposts
     })
-  }
-
-
-  test() {
-    return "test";
   }
 
 
@@ -114,6 +108,7 @@ export class Main extends React.Component {
        post_id: post_id,
        user_id: parseInt(localStorage.getItem("current_user")),
        content: content,
+       upvotes: 0,
        response_num: 0,
        responses: []
      });
@@ -134,7 +129,8 @@ export class Main extends React.Component {
         micropost.responses.push({
           user_id: parseInt(localStorage.getItem("current_user")),
           content: content,
-          response_id: micropost.response_num
+          response_id: micropost.response_num,
+          upvotes: 0,
         });
         micropost.response_num++;
         temp.push(micropost);
@@ -184,18 +180,26 @@ export class Main extends React.Component {
   }
 
 
-  editPost(post_id, response_id, content) {
+  update(post_id, response_id, content) {
     let temp = [];
     _.each(this.state.microposts, function(micropost) {
       if (micropost.post_id === post_id) {
         if (response_id === "n") {
-          micropost.content = content;
+          if (content === "") {
+            micropost.upvotes++;
+          } else {
+            micropost.content = content
+          }
         } else {
           let responses = [];
           response_id = parseInt(response_id);
           _.each(micropost.responses, function(response) {
             if (response.response_id === response_id) {
-              response.content = content;
+              if (content === "") {
+                response.upvotes++;
+              } else {
+                response.content = content
+              }
             }
             responses.push(response);
           });
@@ -247,13 +251,14 @@ export class Main extends React.Component {
               newComment={() => this.newComment}
               deletePost={() => this.deletePost}
               deleteComment={() => this.deleteComment}
+              update={() => this.update}
             />
           ) }/>
 
           <Route path="/edit/:post_id" render={ (props) => (
             <Edit
               {...props}
-              editPost={() => this.editPost}
+              update={() => this.update}
              />)
           }/>
 

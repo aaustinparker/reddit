@@ -3,13 +3,13 @@ import React from 'react';
 let _  = require('underscore');
 
 
-export const Posts = ({ newPost, newComment, deletePost, deleteComment, history }) => {
+export const Posts = (props) => {
 
   document.title = "Micropost Hub";
 
   if (!localStorage.getItem("current_user")) {
     alert("Please log in before posting a comment.");
-    history.push('/signup');
+    props.history.push('/signup');
   }
 
   let users = JSON.parse(localStorage.getItem("users"));
@@ -25,8 +25,13 @@ export const Posts = ({ newPost, newComment, deletePost, deleteComment, history 
 
   function makePost(event) {
     event.preventDefault();
-    newPost()(document.getElementById("comment").value);
-    document.getElementById("comment").value = '';
+    let content = document.getElementById("comment").value;
+    if (content.length === 0) {
+      alert("Please type out a post before submitting.");
+    } else {
+      props.newPost()(content);
+      document.getElementById("comment").value = '';
+    }
   }
 
 
@@ -34,21 +39,36 @@ export const Posts = ({ newPost, newComment, deletePost, deleteComment, history 
     event.preventDefault();
     let post_id = event.target.dataset.post_id;
     let content = document.getElementById("response" + post_id).value;
-    newComment()(parseInt(post_id), content);
-    document.getElementById("response" + post_id).value = '';
+    if (content.length === 0) {
+      alert("Please type out a comment before submitting.");
+    } else {
+      props.newComment()(parseInt(post_id), content);
+      document.getElementById("response" + post_id).value = '';
+    }
   }
 
 
   function removeComment(event) {
     let post_id = parseInt(event.target.dataset.post_id);
     let response_id = parseInt(event.target.dataset.response_id);
-    deleteComment()(post_id, response_id);
+    props.deleteComment()(post_id, response_id);
   }
 
 
   function removePost(event) {
     let post_id = parseInt(event.target.dataset.post_id);
-    deletePost()(post_id);
+    props.deletePost()(post_id);
+  }
+
+
+  function upvote(event) {
+    let target = event.target.id;
+    let divider = target.indexOf("_");
+    props.update()(
+      parseInt(target.substring(0, divider)),
+      target.substring(divider+ 1),
+      ""
+    );
   }
 
 
@@ -64,23 +84,26 @@ export const Posts = ({ newPost, newComment, deletePost, deleteComment, history 
         if (parseInt(localStorage.getItem("current_user")) === response.user_id) {
           deleteAndEditComment = (
             <span>
-              <button data-post_id={micropost.post_id}  data-response_id={response.response_id}
-                type="button" onClick={removeComment}>Delete</button>
-                <button type="button" onClick={() =>
-                  history.push('/edit/' + micropost.post_id + "_" + response.response_id)}>
-                  Edit</button>
+            <button type="button" onClick={() =>
+              props.history.push('/edit/' + micropost.post_id + "_" + response.response_id)}>
+              Edit</button>
+            <button data-post_id={micropost.post_id}  data-response_id={response.response_id}
+              type="button" onClick={removeComment}>Delete</button>
             </span>
           );
         } else {
-          deleteAndEditComment = <span></span>;
+          deleteAndEditComment = <img id={micropost.post_id + "_" + response.response_id}
+            onClick={upvote} className="upvote" alt="" src="./img/upvote.jpeg" />;
         }
+
         return (
           <li key={i++}>
             <span className="responder">{findPoster(response.user_id).username}</span>
             <span> replied: </span>
             <span className="content">{response.content}</span>
-            <span>  &nbsp;   </span>
+            <span> &nbsp; </span>
             {deleteAndEditComment}
+            <span>  &nbsp; &nbsp; ({response.upvotes} upvotes)</span>
           </li>
         );
       });
@@ -93,14 +116,15 @@ export const Posts = ({ newPost, newComment, deletePost, deleteComment, history 
       deleteAndEditPost = (
         <span>
         <button type="button" onClick={() =>
-          history.push('/edit/' + micropost.post_id + "_n")}>
+          props.history.push('/edit/' + micropost.post_id + "_n")}>
           Edit</button>
         <button data-post_id={micropost.post_id} type="button"
           onClick={removePost}>Delete</button>
         </span>
       );
     } else {
-      deleteAndEditPost = <span></span>;
+      deleteAndEditPost = <img onClick={upvote} id={micropost.post_id + "_n"}
+       className="upvote" alt="" src="./img/upvote.jpeg" />;
     }
 
     let id = "response" + micropost.post_id;
@@ -112,7 +136,7 @@ export const Posts = ({ newPost, newComment, deletePost, deleteComment, history 
           <span className="content">{micropost.content}</span>
           <span>  &nbsp;   </span>
           {deleteAndEditPost}
-          <div>&nbsp;</div>
+          <span>  &nbsp; &nbsp; ({micropost.upvotes} upvotes)</span>
         </li>
         {responses}
         <li>
