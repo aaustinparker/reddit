@@ -4,11 +4,9 @@
   "private": true,
   "dependencies": {
     "babel": "^6.23.0",
-    "babel-jest": "^20.0.3",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "crypto": "0.0.3",
-    "jest": "^20.0.4",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
     "react-router-dom": "^4.1.1",
@@ -16,12 +14,15 @@
     "underscore": "^1.8.3"
   },
   "devDependencies": {
+    "chai": "^4.0.2",
+    "enzyme": "^2.8.2",
+    "mocha": "^3.4.2",
     "react-scripts": "1.0.7"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
+    "test": "mocha --require babel-register src/tests/*.spec.js",
     "eject": "react-scripts eject"
   }
 }

@@ -6,7 +6,6 @@ import {
   Route
 } from 'react-router-dom';
 
-
 import { Login } from './Login';
 import { Signup } from './Signup';
 import { Posts } from './Posts';
@@ -14,6 +13,7 @@ import { Edit } from './Edit';
 
 let _  = require('underscore');
 let crypto = require('crypto');
+
 
 export class Main extends React.Component {
 
